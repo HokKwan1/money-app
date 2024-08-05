@@ -1,14 +1,16 @@
 import { useLayoutEffect, useContext } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import IconButton from '../components/UI/IconButton';
+import { View, StyleSheet } from 'react-native';
 import { GlobalStyles } from '../constants/styles';
-import Button from '../components/UI/Button';
 import { ExpensesContext } from '../store/expenses-context';
+import ExpenseForm from '../components/ManageExpense/ExpenseForm';
+import IconButton from '../components/UI/IconButton';
 
 function ManageExpense({ route, navigation }) {
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
   const expensesCtx = useContext(ExpensesContext);
+
+  const selectedExpense = expensesCtx.expenses.find((expense) => expense.id === editedExpenseId);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -27,21 +29,21 @@ function ManageExpense({ route, navigation }) {
     navigation.goBack();
   }
 
-  function confirmHandler() {
+  function confirmHandler(expenseData) {
     if (isEditing) {
-      expensesCtx.updateExpense(editedExpenseId, {description: 'Test!!!', amount: 29.99, date: new Date('2024-08-03')});
+      expensesCtx.updateExpense(editedExpenseId, expenseData);
     } else {
-      expensesCtx.addExpense({description: 'Test', amount: 19.99, date: new Date('2024-08-01')});
+      expensesCtx.addExpense(expenseData);
     }
     navigation.goBack();
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.buttons}>
-        <Button mode='flat' onPress={cancelHandler} style={styles.buttonStyle}>Cancel</Button>
-        <Button onPress={confirmHandler} style={styles.buttonStyle}>{isEditing ? 'Update':'Add'}</Button>
-      </View>
+      <ExpenseForm onCancel={cancelHandler} 
+      onSubmit={confirmHandler}
+      submitButtonLabel={isEditing ? 'Update' : 'Add'}
+      defaultValues={selectedExpense}/>
       {isEditing && (
         <View style={styles.deleteContainer}>
           <IconButton
@@ -70,13 +72,4 @@ const styles = StyleSheet.create({
     borderTopColor: GlobalStyles.colors.primary200,
     alignItems: 'center'
   },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  buttonStyle: {
-    minWidth: 180,
-    marginHorizontal: 8
-  }
 })
