@@ -1,17 +1,19 @@
 import axios from 'axios';
 
 const ROOT_URL = 'https://react-nactive-test-default-rtdb.firebaseio.com'
-const expenseSegment = '/expenses.json'
 
-export function storeExpense(expenseData) {
-  axios.post(
-    ROOT_URL + expenseSegment,
+export async function storeExpense(expenseData) {
+  const response = await axios.post(
+    ROOT_URL + '/expenses.json',
     expenseData);
+  
+  const id = response.data.name;
+  return id;
 }
 
 export async function fetchExpenses() {
   const response = await axios.get(
-    ROOT_URL + expenseSegment
+    ROOT_URL + '/expenses.json'
   )
 
   const expenses = [];
@@ -25,4 +27,12 @@ export async function fetchExpenses() {
     expenses.push(expenseObj);
   }
   return expenses;
+}
+
+export function updateExpense(id, expenseData) {
+  return axios.put(ROOT_URL + `/expenses/${id}.json`, expenseData);
+}
+
+export function deleteExpense(id) {
+  return delete(ROOT_URL + `/expenses/${id}.json`);
 }
